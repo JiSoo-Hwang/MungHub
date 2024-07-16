@@ -205,25 +205,27 @@
 		ORDER BY FILE_LEVEL
 	</select>
 	<select id="likeCount" parameterType="com.kh.pjtMungHub.board.model.vo.Recommend" resultType="_int">
-	SELECT RCOUNT
-	FROM BOARD_RECOMMEND BR
-	WHERE BOARD_NO = #{boardNo}
-	JOIN BOARD B ON BR.BOARD_NO=R.BOARD_NO
-	AND BR.STATUS='Y'
+	SELECT COUNT(*) recommend
+	FROM BOARD_RECOMMEND
+	WHERE BOARD_NO=#{boardNo}
+	AND USER_NO= #{userNo}
+	AND STATUS ='Y'
 	</select>
-	<update id="updateLike" parameterType="com.kh.pjtMungHub.board.model.vo.Recommend">
+	<insert id="updateLike" parameterType="com.kh.pjtMungHub.board.model.vo.Recommend">
 	MERGE INTO BOARD_RECOMMEND BR
 	USING DUAL
 	ON (BOARD_NO=#{boardNo} AND USER_NO=#{userNo})
 	WHEN MATCHED THEN
     UPDATE SET 
     STATUS='N'
-    AND (RECOMMEND-1)
+    DELETE
+    WHERE STATUS='N'
 	WHEN NOT MATCHED THEN
-    INSERT (BOARD_NO,USER_NO,RECOMMEND),
+    INSERT (BOARD_NO,USER_NO),
 	VALUES
-	(#{boardNo},#{userNo},(RECOMMEND+1))
-	</update>
+	(#{boardNo},#{userNo},)
+	</insert>
+	
 	<delete id="deleteLike" parameterType="com.kh.pjtMungHub.board.model.vo.Recommend">
 	DELETE FROM BOARD_RECOMMEND
 	WHERE BOARD_NO=#{boardNo}

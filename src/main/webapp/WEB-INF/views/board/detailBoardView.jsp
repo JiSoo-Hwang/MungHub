@@ -17,12 +17,13 @@ body {
 	background-color: #f4f4f9;
 	margin: 0;
 	padding: 0;
+	box-sizing:border-box;
 }
 
-.content {
-	max-width: 800px;
+.contentArea {
+	max-width: 600px;
 	margin: 20px auto;
-	background: white;
+	background: pink;
 	padding: 20px;
 	border-radius: 8px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -78,6 +79,7 @@ img, video {
 .ckRecommend{
 	backgoundcolor: pink;
 }
+
 </style>
 </head>
 <body>
@@ -92,7 +94,7 @@ img, video {
 
 			<table id="contentArea" algin="center" class="table">
 				<tr>
-					<th width="100">제목</th>
+					<th width="60">제목</th>
 					<td colspan="10">${b.boardTitle}</td>
 				</tr>
 				<tr>
@@ -109,11 +111,12 @@ img, video {
 				</tr>
 				<tr>
 				<td colspan="4">
-					<p style="height: 150px;">${b.boardContent}</p>
+					<p style="height=150px;">${b.boardContent}</p>
 				</td>
 				</tr>
 				<tr>
-				<td colspan="4"><c:forEach items="${aList}" var="result">
+				<td colspan="4">
+				<c:forEach items="${aList}" var="result">
 						<c:choose>
 							<c:when test="${result.fileType eq 'image'}">
 								<img src="${result.filePath}${result.changeName}"
