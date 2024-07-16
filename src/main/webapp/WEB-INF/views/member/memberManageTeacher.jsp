@@ -94,6 +94,7 @@
 						</thead>
 						<tbody>
 							<c:forEach items="${tList}" var="t">
+								<c:if test="${t.status eq 'Y' }">
 									<tr>
 										<td>${t.name}</td>
 										<td>${t.userId}</td>
@@ -101,7 +102,8 @@
 										<td>${t.kindName}</td>
 										<td>${t.joinDate}</td>
 										<td><button onclick="newMaster(${t.userNo},'${t.kindName}');">위임</button><button onclick="calcel(${t.userNo});">해제</button></td>
-									</tr>						
+									</tr>
+								</c:if>						
 							</c:forEach>
 						</tbody>
 					</table>

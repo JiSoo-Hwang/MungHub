@@ -43,7 +43,7 @@
     </div>
 
     <div class="container mt-4">
-        <h1 class="text-center">Hospital List</h1>
+        <h1 class="text-center">경기도 동물병원</h1>
         <div class="d-flex mb-3">
             <button id="reserBtn" class="btn btn-primary nowrap">나의 예약내역</button>
             <select id="location"  class="ms-2 form-select">
@@ -169,8 +169,7 @@
                             + "<td><span>" + list.hosAddress + "</span></td>"
                             + "<td><span>" + list.hosAddress + "</span></td>"
                             + "<td>"
-                            + "<button id='deleteBtn' class='btn btn-danger nowrap' onclick='location.href?hosReNo='"+list.hosReNo+"'>삭제</button>"
-                            + "</td>" 
+                            + "<button id='deleteBtn' class='btn btn-danger nowrap' onclick='location.href=\"hospitalDelete.re?hosReNo=" + list.hosReNo + "\"'>삭제</button>"                            + "</td>" 
                             + "</tr>";
 					});
 					$('#result tbody').html(str); // 결과를 테이블 본문에 삽입
@@ -239,7 +238,6 @@
 		        kakaoInfo.innerHTML = '<p>카카오 제공정보가 없습니다.</p>';
 		    }
 		}
-		
 
 	});
 		

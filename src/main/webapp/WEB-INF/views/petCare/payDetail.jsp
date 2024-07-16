@@ -63,6 +63,7 @@
 </head>
 <body>
     <%@include file="/WEB-INF/views/common/header.jsp" %>
+    <input type="hidden" id="paymentId" value="${p.paymentId }">
 
     <div class="container order-completion">
         <div class="order-header">주문 완료 되었습니다</div>
@@ -77,13 +78,43 @@
             <p><strong>쿠폰할인:</strong> 0원</p>
         </div>
         <div class="payment-info">
-            <p><strong>결제상세:</strong></p>
-            <p><strong>결제방법:</strong> card </p>
+            <strong>결제상태:</strong> <input type="text" id="statusName" value="" style="border:none;">
+             <p><strong>결제방법:</strong> card </p>
             <p><strong>결제일:</strong> ${p.paymentDate }</p>
         </div>
         <div class="text-center">
             <button class="btn-order-details" onclick="location.href='/pjtMungHub/'">메인으로 돌아가기</button>
         </div>
     </div>
+    
+    <script>
+    	$(function(){
+    		statusName();
+    	});
+    	
+    	function statusName(){
+    		
+    		var paymentId = $('#paymentId').val();
+    		
+    		$.ajax({
+    			url: "statusName.re",
+    			data: {paymentId : paymentId},
+    			success: function(result){
+    				
+    				console.log(result.statusName);
+    				
+    				$('#statusName').val(result.statusName);
+    			},
+    			error: function(){
+    				console.log('통신오류');
+    			}
+    		});
+    	}
+    
+    </script>
+    
+    
+    
+    
 </body>
 </html>

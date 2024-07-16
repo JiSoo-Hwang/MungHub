@@ -25,10 +25,14 @@
         margin: 5px;
         transition: background-color 0.3s, color 0.3s;
     }
-    .str-btn.selected {
-        background-color: #28a745;
-        color: white;
-    }
+	.str-btn.selected {
+	  background-color: #28a745;
+	  color: white;
+	}
+	.str-btn.active {
+	  background-color: lightblue;
+	  color: white;
+	}
 	
 	/* 소요시간 CSS  */
     .duration-btn-group , .petType-btn-group {
@@ -48,10 +52,14 @@
         background-color: white;
         transition: background-color 0.3s, color 0.3s;
     }
-    .duration-btn.selected , .petType-btn.selected {
-        background-color: #007bff;
-        color: white;
-    }
+	.duration-btn.selected, .petType-btn.selected {
+	   background-color: skyblue;
+	   color: white;
+	 }
+	 .duration-btn.active, .petType-btn.active {
+	   background-color: lightblue;
+	   color: white;
+	 }
     .duration-btn span , petType-btn span {
         display: block;
         font-size: 14px;
@@ -71,7 +79,7 @@
         margin-top: 5px;
     }
     .btn-reserve {
-        background-color: #007bff;
+        background-color: skyblue;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -84,10 +92,10 @@
     
     /* 시팅용품 */
     .items-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    align-items: center;
+	    display: flex;
+	    flex-wrap: wrap;
+	    justify-content: space-around;
+	    align-items: center;
 	}
 	
 	.item {

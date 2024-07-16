@@ -153,6 +153,11 @@ public class PetCareDao {
 		RowBounds rowBounds = new RowBounds(offset,limit);
 		return (ArrayList)sqlSession.selectList("petcareMapper.selectLongReview",houseNo,rowBounds);
 	}
+	
+	//Disabled 를 위해 예약된 Date 정보 불러오기
+	public ArrayList<HouseReservation> selectReList(SqlSessionTemplate sqlSession, int houseNo) {
+		return (ArrayList)sqlSession.selectList("petcareMapper.selectReList",houseNo);
+	}
 
 	//선택한 요금정보
 	public HousePrice selectPriceInfo(SqlSessionTemplate sqlSession, int stayNo) {
@@ -220,6 +225,37 @@ public class PetCareDao {
 	public int hospitalDelete(SqlSessionTemplate sqlSession, int hosReNo) {
 		return sqlSession.update("petcareMapper.hospitalDelete",hosReNo);
 	}
+	
+	//메인페이지
+	public PetSitter mainSitter(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("petcareMapper.mainSitter");
+	}
+	public House mainHouse(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("petcareMapper.mainHouse");
+	}
+	public HospitalRe mainHospital(SqlSessionTemplate sqlSession) {
+		return sqlSession.selectOne("petcareMapper.mainHospital");
+	}
+	
+	//결제테이블, 결제상태변경
+	public int updatePayment(SqlSessionTemplate sqlSession, String reservationNo) {
+		return sqlSession.update("petcareMapper.updatePayment",reservationNo);
+	}
+	public int updatePayment2(SqlSessionTemplate sqlSession, String reservationHouseNo) {
+		return sqlSession.update("petcareMapper.updatePayment2",reservationHouseNo);
+	}
+	
+	//결제 statusName
+	public Payment statusName(SqlSessionTemplate sqlSession, String paymentId) {
+		return sqlSession.selectOne("petcareMapper.statusName",paymentId);
+	}
+	
+	//병원 접수페이지로
+	public ArrayList<HospitalRe> selectPreHos(SqlSessionTemplate sqlSession, String hosName) {
+		return (ArrayList)sqlSession.selectList("petcareMapper.selectPreHos",hosName);
+	}
+	
+
 
 	
 

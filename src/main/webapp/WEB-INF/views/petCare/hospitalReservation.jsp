@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"
     import="java.util.Date, java.text.SimpleDateFormat"%>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+    <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%
 	Date today = new Date();
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -429,6 +431,15 @@ import listPlugin from '@fullcalendar/list';
 
             <button type="submit" class="reservation-btn" id="reBtn">예약페이지로</button>
         </form>
+        
+        <c:forEach var="r" items="${reList}" varStatus="status">
+		    <input type="hidden" class="reservation-id" value="${r.hosReNo}">
+		    <input type="hidden" class="reservation-date" value="${r.reDate}">
+		    <input type="hidden" class="reservation-time" value="${r.reTime}">
+		</c:forEach>
+		<input type="hidden" id="totalReservations" value="${fn:length(reList)}">
+        
+        
     </div>	
 	<br><br>
    
@@ -466,6 +477,110 @@ import listPlugin from '@fullcalendar/list';
 		}
 	
 		//============== 달력 ===================
+			
+		$(document).ready(function() {
+		    var disabledDates = [];
+		    
+		    // 예약 정보를 배열에 추가
+		    $('.reservation-id').each(function(index) {
+		        var reservation = {
+		            reservationId: $(this).val(),
+		            date: $('.reservation-date').eq(index).val(),
+		            time: $('.reservation-time').eq(index).val()
+		        };
+		        disabledDates.push(reservation);
+		    });
+		    
+		    console.log('예약불가 날짜들:', disabledDates);
+		
+		    // disabledDates 배열을 평탄화하여 모든 날짜를 포함하는 단일 배열 생성
+		    var allDisabledDates = disabledDates.flatMap(date => {
+		        const dates = [];
+		        let currentDate = new Date(date.date);
+		        const endDate = new Date(date.date);  // Assuming reDate is a single date
+		
+		        while (currentDate <= endDate) {
+		            dates.push(new Date(currentDate));
+		            currentDate.setDate(currentDate.getDate() + 1);
+		        }
+		
+		        return dates;
+		    });
+		
+		    console.log('평탄화 작업한 배열:', allDisabledDates);
+		
+		    var formattedDate = $('#formattedDate').val(); // 오늘 날짜 기준
+		    var calendarEl = $('#calendar')[0];
+		    var calendar = new FullCalendar.Calendar(calendarEl, {
+		        initialView: 'dayGridMonth',
+		        locale: 'ko', // 한글 로케일 설정
+		        headerToolbar: {
+		            left: '',
+		            center: 'title',
+		            right: 'prev,next'
+		        },
+		        validRange: { // 오늘 날짜 이전 막아주기
+		            start: formattedDate
+		        },
+		        selectAllow: function(selectInfo) {
+		            var selectedDate = new Date(selectInfo.startStr);
+		
+		            return !allDisabledDates.some(disabledDate => {
+		                return selectedDate.getTime() === disabledDate.getTime();
+		            });
+		        },
+		        events: allDisabledDates.map(date => ({
+		            start: date.toISOString().split('T')[0],
+		            end: date.toISOString().split('T')[0],
+		            allDay: true,
+		            display: 'background',
+		            backgroundColor: '#ff9f89' // 예약된 날짜 배경 색상 설정
+		        })),
+		        dateClick: function(info) {
+		            var selectedDate = new Date(info.dateStr);
+		            var reDate = selectedDate.toISOString().split('T')[0];
+		            $('#reDate').val(reDate);
+		            
+		            var isDisabled = allDisabledDates.some(disabledDate => {
+		                return selectedDate.getTime() === disabledDate.getTime();
+		            });
+		
+		            if (isDisabled) {
+		                alert('이미 예약된 날짜입니다. 다른 날짜를 선택하세요.');
+		                return;
+		            }
+		
+		            // 스타일
+		            $('.fc-daygrid-day').removeClass('fc-day-selected'); // 모든 셀 표시 제거
+		            $(info.dayEl).addClass('fc-day-selected'); // 클릭된 날짜만 표시
+		           
+		        }
+		    });
+		    setTimeout(function() {
+		        calendar.render();
+		     // 페이지 첫번째 로드시 오늘 날짜, 예약시간, 펫크기 기본선택 및 스타일 적용
+	            var todayEl = $('.fc-daygrid-day[data-date="' + formattedDate + '"]');
+	            todayEl.addClass('fc-day-selected');
+	            $('#reDate').val(formattedDate);
+	         // 에약시간
+	         	var firstStrBtn = $('.str-btn').first();
+	         	firstStrBtn.addClass('selected');
+	         	$('#reTime').val(firstStrBtn.val());
+	         
+	         // 펫크기
+	         	var firstPetTypeBtn = $('.petType-btn').first();
+	         	firstPetTypeBtn.addClass('selected');
+	         	$('#petType').val(firstPetTypeBtn.val());
+	            
+		    }, 500);
+		});
+			
+			
+			
+			
+			
+			
+			/*
 		$(function() {
 			var formattedDate = $('#formattedDate').val(); //오늘날짜기준
 		    var calendarEl = $('#calendar')[0];
@@ -492,24 +607,8 @@ import listPlugin from '@fullcalendar/list';
 		            $('#reDate').val(reDate);
 		        }
 		    });
-		    setTimeout(function() {
-		        calendar.render();
-		     // 페이지 첫번째 로드시 오늘 날짜, 예약시간, 펫크기 기본선택 및 스타일 적용
-	            var todayEl = $('.fc-daygrid-day[data-date="' + formattedDate + '"]');
-	            todayEl.addClass('fc-day-selected');
-	            $('#reDate').val(formattedDate);
-	         // 에약시간
-	         	var firstStrBtn = $('.str-btn').first();
-	         	firstStrBtn.addClass('selected');
-	         	$('#reTime').val(firstStrBtn.val());
-	         
-	         // 펫크기
-	         	var firstPetTypeBtn = $('.petType-btn').first();
-	         	firstPetTypeBtn.addClass('selected');
-	         	$('#petType').val(firstPetTypeBtn.val());
-	            
-		    }, 500);
-		});
+		    */
+		    
 	</script>
 </body>
 </html>

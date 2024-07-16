@@ -161,6 +161,12 @@ public class PetCareServiceImpl implements PetCareService {
 		return petCareDao.selectLongReview(sqlSession,houseNo,pi);
 	}
 	
+	//Disabled 를 위해 예약된 Date 정보 불러오기
+	@Override
+	public ArrayList<HouseReservation> selectReList(int houseNo) {
+		return petCareDao.selectReList(sqlSession,houseNo);
+	}
+	
 
 	//선택한 요금정보
 	@Override
@@ -243,6 +249,44 @@ public class PetCareServiceImpl implements PetCareService {
 	public int hospitalDelete(int hosReNo) {
 		return petCareDao.hospitalDelete(sqlSession,hosReNo);
 	}
+	
+	//메인페이지
+	@Override
+	public PetSitter mainSitter() {
+		return petCareDao.mainSitter(sqlSession);
+	}
+	@Override
+	public House mainHouse() {
+		return petCareDao.mainHouse(sqlSession);
+	}
+	@Override
+	public HospitalRe mainHospital() {
+		return petCareDao.mainHospital(sqlSession);
+	}
+	
+	//결제테이블, 결제상태변경
+	@Override
+	public int updatePayment(String reservationNo) {
+		return petCareDao.updatePayment(sqlSession,reservationNo);
+	}
+	@Override
+	public int updatePayment2(String reservationHouseNo) {
+		return petCareDao.updatePayment2(sqlSession,reservationHouseNo);
+	}
+	
+	//결제 statusName
+	@Override
+	public Payment statusName(String paymentId) {
+		return petCareDao.statusName(sqlSession,paymentId);
+	}
+	
+	//병원 접수페이지로
+	@Override
+	public ArrayList<HospitalRe> selectPreHos(String hosName) {
+		return petCareDao.selectPreHos(sqlSession,hosName);
+	}
+	
+
 	
 
 	

@@ -70,6 +70,7 @@
         <a href="/pjtMungHub/adminPage/orderControll">주문 관리</a>
         <a href="/pjtMungHub/adminPage/productControll">제품 관리</a>
         <a href="/pjtMungHub/adminPage/customerControll">고객 관리</a>
+        <a href="/pjtMungHub/adminPage/eventControll">이벤트 관리</a>
     </div>
 
     <div class="main-content">
@@ -146,6 +147,19 @@
 
 
 <script>
+	var january=${month.january};
+	var feburary=${month.feburary};
+	var march=${month.march};
+	var april=${month.april};
+	var may=${month.may};
+	var june=${month.june};
+	var july=${month.july};
+	var august=${month.august};
+	var september=${month.september};
+	var october=${month.october};
+	var november=${month.november};
+	var december=${month.december};
+	
     document.addEventListener('DOMContentLoaded', function () {
         // Sales Chart
         const salesCtx = document.getElementById('sales-chart').getContext('2d');
@@ -154,8 +168,8 @@
             data: {
                 labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                 datasets: [{
-                    label: '매출(만원)',
-                    data: [10000, 20000, 15000, 30000, 25000, 20000, 15000, 40000, 30000, 25000, 20000, 35000],
+                    label: '매출(원)',
+                    data: [january, feburary, march, april, may, june, july, august, september, october, november, december],
                     backgroundColor: 'rgba(90, 103, 216, 0.2)',
                     borderColor: 'rgba(90, 103, 216, 1)',
                     borderWidth: 2,
@@ -172,6 +186,22 @@
             }
         });
 
+        
+    	var januaryC=${monthCount.january};
+    	var feburaryC=${monthCount.feburary};
+    	var marchC=${monthCount.march};
+    	var aprilC=${monthCount.april};
+    	var mayC=${monthCount.may};
+    	var juneC=${monthCount.june};
+    	var julyC=${monthCount.july};
+    	var augustC=${monthCount.august};
+    	var septemberC=${monthCount.september};
+    	var octoberC=${monthCount.october};
+    	var novemberC=${monthCount.november};
+    	var decemberC=${monthCount.december};
+        
+        
+        
         // Orders Chart
         const ordersCtx = document.getElementById('orders-chart').getContext('2d');
         const ordersChart = new Chart(ordersCtx, {
@@ -180,7 +210,7 @@
                 labels: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
                 datasets: [{
                     label: '주문 수',
-                    data: [10, 15, 20, 25, 30, 35, 40, 45, 50, 45, 40, 35],
+                    data: [januaryC, feburaryC, marchC, aprilC, mayC, juneC, julyC, augustC, septemberC, octoberC, novemberC, decemberC],
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 2

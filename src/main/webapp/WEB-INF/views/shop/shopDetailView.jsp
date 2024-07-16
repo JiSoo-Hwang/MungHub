@@ -442,7 +442,7 @@ color: purple;
 							<dt>판매량</dt>
 							<dd>
 								<strong><fmt:formatNumber type="number"
-										maxFractionDigits="0" value="${p.salesConunt}" /></strong>
+										maxFractionDigits="0" value="${p.salesCount}" /></strong>
 							</dd>
 						</dl>
 						<dl class="dl-row">
@@ -1016,7 +1016,7 @@ color: purple;
 		<c:if test="${not empty loginUser }"> data-bs-toggle="modal" data-bs-target="#reviewModal"</c:if>
 		id="reviewButton"> 
 	<span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-    <span class="visually-hidden">New alerts</span> <small>작성 시 150P 적립!</small>
+    <span class="visually-hidden">point alert</span> <small>작성 시 150P 적립!</small>
   </span>리뷰작성</button>
 		</div>
 		
@@ -1158,6 +1158,7 @@ color: purple;
 		}	
 		
 		$(function(){
+			console.log("${orderItemArr}");
 			var str="";
 			$("#insertVideo").click(function(){
 				$("#insertVideo").attr("class","nav-link active");
@@ -1182,10 +1183,26 @@ color: purple;
 			});
 			
 			$("#review-write").click(function(){
+			
+				const dupArr=${orderItemArr};
+				const set = new Set(dupArr);
+				const uniqueArr = [...set];
+				
+				var flag=false;
+				
+				for (var i = 0; i < uniqueArr.length; i++) {
+					if(uniqueArr[i]==${p.productNo}){
+						flag=true;
+					}
+					
+				}
+				
+				if(flag){
+			
 				if($("#content").val()!=""){
 					
 				
-
+				
 				    var requestData = {userNo : ${loginUser.userNo},
 							productNo : ${p.productNo},
 							reviewContent : $("#content").val(),
@@ -1219,8 +1236,13 @@ color: purple;
 			}else{
 				alert("리뷰 내용을 작성해주세요.");
 			}
+				}else{
+					alert("제품을 수령받으신 이후에 작성하실 수 있습니다.");
+				}
 			});
-	
+			
+			
+			
 		});
 		
 		function reviewUpdate(num){

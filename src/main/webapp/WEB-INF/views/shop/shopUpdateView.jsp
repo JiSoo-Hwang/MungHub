@@ -46,7 +46,7 @@
                         <th><label for="brandCode">브랜드</label></th>
                         <td><select name="brandCode">
                         	  <c:forEach items="${b}" var="brand">
-                        	<option value="${brand.brandCode }" <c:if test="${p.brandCode eq brand.brandCode}">selected="selected"</c:if>>${brand.brandeName }</option>
+                        	<option value="${brand.brandCode }" <c:if test="${p.brandCode eq brand.brandCode}">selected="selected"</c:if>>${brand.brandName }</option>
                         </c:forEach>
                         </select></td>
                     </tr>

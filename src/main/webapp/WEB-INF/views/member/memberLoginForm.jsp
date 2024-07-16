@@ -15,16 +15,15 @@
 <style>
 	.total-area{
 		width:100%;
-		overflow:auto;
 		margin:auto;
 	}
 	#loginArea{
+		height:	500px;
 		margin-left:25%;
 		margin-right:25%;
 		margin-top:10%;
 		margin-bottom:30px;
 		border:1px solid lightgray;
-		overflow: auto;
 	}
 	#loginMain{
 		background-color:
@@ -71,11 +70,18 @@
 		border-top:1px solid gray;
 		height: 20%;
 	}
+	#loginAPIArea>div{
+		width: inherit;
+	}
+	.apiArea{
+		height:180px;
+		left:50%;
+		position:absolute;
+	}
 	.apiArea>div{
-		float:left;
-		margin-left:30%;
-		margin-top:5px;
-		margin-bottom:5px;
+		position:relative;
+		margin-bottom:10px;
+		transform:translate(-50%,50%);
 	}
 	#kakao_login{
 		display: inline-block;
@@ -87,7 +93,7 @@
 	}
 	.kakaoButton:hover {
 		cursor: pointer;
-}
+	}
 </style>
 </head>
 <body>
@@ -136,25 +142,31 @@
 				<h5 align="center">다른 방식으로 로그인하기</h5>
 			</div>
 			<div class="apiArea">
-			<div id="kakao_login">
-				<img src="./resources/uploadFiles/login/kakao2.png" class="kakaoButton" onclick="kakao();">
-			</div>
-			<div id="naver_id_login"></div>
-			<div id="g_id_onload"
-			     data-client_id="214727713756-rr8ifm1lva6musaa03n7iasqdssae36q.apps.googleusercontent.com"
-			     data-context="signin"
-			     data-ux_mode="popup"
-			     data-callback="handleCredentialResponse"
-			     data-auto_prompt="false">
-			</div>
-			<div class="g_id_signin"
-			     data-type="standard"
-			     data-shape="rectangular"
-			     data-theme="outline"
-			     data-text="signin_with"
-			     data-size="large"
-			     data-logo_alignment="left">
-			</div>	
+					<div id="kakao-login">
+						<div id="kakao_login">
+							<img src="./resources/uploadFiles/login/kakao2.png" class="kakaoButton" onclick="kakao();">
+						</div>
+					</div>
+					<div id="naver-login">
+						<div id="naver_id_login"></div>
+					</div>
+					<div id="g_id_onload"
+					     data-client_id="214727713756-rr8ifm1lva6musaa03n7iasqdssae36q.apps.googleusercontent.com"
+					     data-context="signin"
+					     data-ux_mode="popup"
+					     data-callback="handleCredentialResponse"
+					     data-auto_prompt="false" hidden="true">
+					</div>
+					<div id="google-login">
+						<div class="g_id_signin"
+						     data-type="standard"
+						     data-shape="rectangular"
+						     data-theme="outline"
+						     data-text="signin_with"
+						     data-size="large"
+						     data-logo_alignment="left">
+						</div>	
+					</div>
 			</div>
 		</div>
 	</div>

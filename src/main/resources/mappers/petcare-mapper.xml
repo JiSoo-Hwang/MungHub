@@ -61,6 +61,7 @@
 	    <result column="PAYMENT_METHOD" property="paymentMethod"/>
 	    <result column="PRODUCT_NAME" property="productName"/>
 	    <result column="PAYMENT_STATUS" property="paymentStatus"/>
+	    <result column="S.STATUS_NAME" property="statusName"/>
 	    <result column="DIFFERENT_NO" property="differentNo"/>
 	    <result column="RESERVATION_NO" property="reservationNo"/>
 	    <result column="RESERVATION_HOUSE_NO" property="reservationHouseNo"/>
@@ -174,7 +175,7 @@
 		    SELECT 1
 		    FROM RESERVATION R
 		    WHERE R.PET_SITTER_NO = P.PET_SITTER_NO
-		    AND R.VISIT_DATE = TO_DATE(#{visitDate}, 'YYYY-MM-DD')
+		    AND R.VISIT_DATE = TO_DATE(#{visitDate}, 'RRRR-MM-DD')
 		    AND (
 		        (R.START_TIME &lt; #{startTime} AND R.END_TIME > #{endTime})
 		    	)
@@ -191,7 +192,7 @@
 		    SELECT 1
 		    FROM RESERVATION R
 		    WHERE R.PET_SITTER_NO = P.PET_SITTER_NO
-		    AND R.VISIT_DATE = TO_DATE(#{visitDate}, 'YYYY-MM-DD')
+		    AND R.VISIT_DATE = TO_DATE(#{visitDate}, 'RRRR-MM-DD')
 		    AND (
 		        (R.START_TIME &lt; #{endTime} AND R.END_TIME > #{startTime})
 		    	)
@@ -314,11 +315,12 @@
 				,PAYMENT_METHOD
 				,PRODUCT_NAME
 				,PAYMENT_DATE
-				,PAYMENT_STATUS
+				,S.STATUS_NAME
 				,DIFFERENT_NO
 				,RESERVATION_ID
 				,RESERVATION_HOUSE_NO
-		FROM PAYMENT
+		FROM PAYMENT P
+		JOIN PAYMENT_STATUS S ON P.PAYMENT_STATUS=S.STATUS_ID
 		WHERE PAYMENT_ID = #{paymentId}
 	</select>
 	
@@ -333,6 +335,24 @@
 		SET PAYMENT_STATUS = 2 
 		WHERE RESERVATION_HOUSE_NO = #{reservationHouseNo}
 	</update>
+	<update id="updatePayment" parameterType="string">
+		UPDATE PAYMENT
+		SET PAYMENT_STATUS = 2 
+		WHERE RESERVATION_ID = #{reservationNo}	
+	</update>
+	<update id="updatePayment2" parameterType="string">
+		UPDATE PAYMENT
+		SET PAYMENT_STATUS = 2 
+		WHERE RESERVATION_HOUSE_NO = #{reservationHouseNo}	
+	</update>
+	
+	<!-- 결제 statusName -->
+	<select id="statusName" parameterType="String" resultType="Payment">
+		SELECT STATUS_NAME as statusName
+		FROM PAYMENT P
+        JOIN PAYMENT_STATUS S ON P.PAYMENT_STATUS=S.STATUS_ID
+		WHERE PAYMENT_ID = #{paymentId}
+	</select>
 	
 	
 	<!-- ============================ 결제 ================================ -->
@@ -391,8 +411,8 @@
 		    SELECT *
 		    FROM HOUSE_RESERVATION R
 		    WHERE H.HOUSE_NO = R.HOUSE_NO
-		    AND R.START_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD') AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
-		    AND R.END_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD') AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+		    AND R.START_DATE BETWEEN TO_DATE(#{startDate}, 'RRRR-MM-DD') AND TO_DATE(#{endDate}, 'RRRR-MM-DD')
+		    AND R.END_DATE BETWEEN TO_DATE(#{startDate}, 'RRRR-MM-DD') AND TO_DATE(#{endDate}, 'RRRR-MM-DD')
 		)
 	</select> 
 	
@@ -411,8 +431,8 @@
 		    SELECT *
 		    FROM HOUSE_RESERVATION R
 		    WHERE H.HOUSE_NO = R.HOUSE_NO
-		    AND R.START_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD') AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
-		    AND R.END_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD') AND TO_DATE(#{endDate}, 'YYYY-MM-DD')
+		    AND R.START_DATE BETWEEN TO_DATE(#{startDate}, 'RRRR-MM-DD') AND TO_DATE(#{endDate}, 'RRRR-MM-DD')
+		    AND R.END_DATE BETWEEN TO_DATE(#{startDate}, 'RRRR-MM-DD') AND TO_DATE(#{endDate}, 'RRRR-MM-DD')
 		)
 	</select>
 	
@@ -473,7 +493,7 @@
 					                  )
 					                  VALUES(
 			                           HOUSE_RESERVATION_SEQ.NEXTVAL,#{houseNo}
-					                  ,TO_DATE(#{startDate}, 'YYYY-MM-DD'),TO_DATE(#{endDate}, 'YYYY-MM-DD')
+					                  ,TO_DATE(#{startDate}, 'RRRR-MM-DD'),TO_DATE(#{endDate}, 'RRRR-MM-DD')
 					                  ,#{stayNo},#{caution}
 					                  ,#{petOwnerName},#{address},#{phone}
 					                  ,DEFAULT,DEFAULT
@@ -502,6 +522,16 @@
 	</select>
 	
 	
+	<!-- Disabled 를 위해 예약된 Date 정보 불러오기 -->
+	<select id="selectReList" parameterType="_int" resultType="HouseReservation">
+		SELECT RESERVATION_HOUSE_NO AS reservationHouseNo
+			  ,START_DATE AS startDate
+		      ,END_DATE AS  endDate
+		FROM HOUSE_RESERVATION
+		WHERE HOUSE_NO = #{houseNo}	
+	</select>
+	
+	
 	<!-- 결제 구분을 위한 reservationId 불러오기 -->
 	<select id="reservationId" resultType="_int">
 		SELECT RESERVATION_SEQ.CURRVAL
@@ -525,6 +555,16 @@
 	
 	
 	<!-- ============================ 동물병원 ================================ -->
+	<!-- 병원 접수페이지로 -->
+	<select id="selectPreHos" parameterType="String" resultType="HospitalRe">
+		SELECT HOS_RE_NO as hosReNo,
+				RE_DATE as reDate,
+				RE_TIME as reTime
+		FROM HOSPITAL_RE
+		WHERE STATUS = 'Y'
+		AND HOS_NAME = #{hosName}
+	</select>
+	
 	<!-- 증상으로 병명 가져오기 -->
 	<select id="diseaseName" parameterType="map" resultType="String">
 		SELECT DISEASE_NAME
@@ -695,9 +735,80 @@
 	
 	<!-- ============================ 동물병원 ================================ -->
 	
-	
-	
+	<!-- ============================ 메인페이지 ================================ -->
+	<select id="mainSitter" resultType="PetSitter">
+		WITH RankedSitter AS (
+		    SELECT 
+		        PET_SITTER_NO
+		       ,COUNT(*) AS sitter_count
+		       ,RANK() OVER (ORDER BY COUNT(*) DESC) AS rank
+		    FROM
+		        RESERVATION
+		    GROUP BY
+		        PET_SITTER_NO
+		)
+		SELECT P.PET_SITTER_NO AS petSitterNo
+			  ,P.PET_SITTER_NAME AS petSitterName
+		      ,P.INTRODUCE AS introduce
+		      ,P.DOG_KEYWORD AS dogKeyword
+			  ,P.TYPE_KEYWORD AS typeKeyword
+			  ,P.PHONE AS phone
+		      ,P.ORIGIN_NAME AS originName
+		      ,P.FILE_PATH AS filePath
+		FROM PET_SITTER P
+		JOIN RankedSitter RS ON P.PET_SITTER_NO = RS.PET_SITTER_NO
+		WHERE RS.rank = 1	
+	</select>
+	<select id="mainHouse" resultType="House">
+		WITH RankedHouse AS (
+		    SELECT
+		        HOUSE_NO
+		       ,COUNT(*) AS house_count
+		       ,RANK() OVER (ORDER BY COUNT(*) DESC) AS rank
+		    FROM
+		        HOUSE_RESERVATION
+		    GROUP BY
+		        HOUSE_NO
+		)
+		SELECT H.HOUSE_NO AS houseNo
+				,H.OWNER_NAME AS ownerName
+				,H.INTRODUCTION_SUMMARY AS introductionSummary
+				,H.HOUSE_ADDRESS AS houseAddress
+				,H.INTRODUCTION_DETAILED AS introductionDetailed
+				,H.NEARBY_HOSPITAL AS nearbyHospital
+				,P.HOUSE_PET_NAME AS housePetNo
+				,W.HOUSE_WALK_NAME AS houseWalkNo
+				,T.PET_TYPE_NAME AS petTypeNo
+				,H.ORIGIN_NAME_01 AS originName01
+				,H.ORIGIN_NAME_02 AS originName02
+				,H.ORIGIN_NAME_03 AS originName03
+				,H.FILE_PATH AS filePath
+		FROM HOUSE H
+		JOIN RankedHouse RH ON H.HOUSE_NO = RH.HOUSE_NO
+				JOIN HOUSE_PET P USING (HOUSE_PET_NO)
+				JOIN HOUSE_WALK W USING (HOUSE_WALK_NO)
+				JOIN PET_TYPE T USING (PET_TYPE_NO)
+		WHERE RH.rank = 1	
+	</select>
+	<select id="mainHospital" resultType="HospitalRe">
+		WITH RankedHospital AS (
+		    SELECT
+		        HOS_NAME,HOS_PHONE,HOS_ADDRESS
+		       ,COUNT(*) AS reservation_count
+		       ,RANK() OVER (ORDER BY COUNT(*) DESC) AS rn
+		    FROM 
+		        HOSPITAL_RE
+		    GROUP BY
+		        HOS_NAME,HOS_PHONE,HOS_ADDRESS
+		)
+		SELECT R.HOS_NAME AS hosName
+			  ,R.HOS_PHONE AS hosPhone
+			  ,R.HOS_ADDRESS AS hosAddress
+		FROM RankedHospital R
+		WHERE rn = 1		
+	</select>
 
+	<!-- ============================ 메인페이지 ================================ -->
 </mapper>
 
 

@@ -1,6 +1,7 @@
 package com.kh.pjtMungHub.shop.model.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,7 +11,9 @@ import com.kh.pjtMungHub.shop.model.vo.Attachment;
 import com.kh.pjtMungHub.shop.model.vo.Brand;
 import com.kh.pjtMungHub.shop.model.vo.Cart;
 import com.kh.pjtMungHub.shop.model.vo.Category;
+import com.kh.pjtMungHub.shop.model.vo.Customer;
 import com.kh.pjtMungHub.shop.model.vo.Favorite;
+import com.kh.pjtMungHub.shop.model.vo.MonthlyTally;
 import com.kh.pjtMungHub.shop.model.vo.POrderInfo;
 import com.kh.pjtMungHub.shop.model.vo.ParameterVo;
 import com.kh.pjtMungHub.shop.model.vo.Point;
@@ -36,7 +39,7 @@ public interface ShopService {
 	ArrayList<Category> selectCategory();
 
 
-	ArrayList<Brand> selectBrand();
+	ArrayList<Brand> selectBrand(String orderBy);
 
 
 	int addCart(Cart c);
@@ -192,6 +195,69 @@ public interface ShopService {
 
 
 	int convertOrderProcess(POrderInfo p);
+
+
+	ArrayList<POrderInfo> selectOrderListComplete(int userNo, String category);
+
+
+	ArrayList<Product> selectTopSalesProduct(String orderBy);
+
+
+	ArrayList<Brand> selectTopSalesBrand(String orderBy);
+
+
+	int selectProductCount(ParameterVo parameter);
+
+
+	ArrayList<Product> selectProductListControll(ParameterVo parameter, PageInfo pi);
+
+
+	int insertBrand(String brandName, ParameterVo fileParameter);
+
+
+	Brand selectBrandOne(int brandCode);
+
+
+	int updateBrand(Brand brand, ParameterVo fileParameter);
+
+
+	int insertCategory(String categoryName);
+
+
+	int updateCategory(Category c);
+
+
+	int deleteCategory(int categoryNo);
+
+
+	ArrayList<Customer> selectTopBuyer();
+
+
+	ArrayList<Customer> selectTopSpenders();
+
+
+	ArrayList<Customer> selectCustomerList();
+
+
+	ArrayList<Question> selectQuestionListControll();
+
+
+	ArrayList<Question> selectQuestionListUser(int userNo);
+
+
+	int replyInquiry(Answer a);
+
+
+	MonthlyTally selectMonthlyTally(HashMap<String, String> map);
+
+
+	MonthlyTally selectMonthlyTallyCount(HashMap<String, String> map);
+
+
+	ArrayList<Attachment> selectMainSlide();
+
+
+	int insertMain(ParameterVo fileParameter);
 
 
 

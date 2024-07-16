@@ -318,7 +318,7 @@
 			                selectedDayEl.classList.add('fc-day-selected');
 			            }
 
-			            // 선택된 날짜와 동일한 예약 정보 필터링
+			            // 선택된 날짜와 예약정보가 동일한 날짜인지 확인
 			            var reservations = disabledDates.filter(function(reservation) {
 			                return reservation.date === selectedDate;
 			            });

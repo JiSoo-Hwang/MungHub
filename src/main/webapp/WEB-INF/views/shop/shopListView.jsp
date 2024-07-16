@@ -50,32 +50,16 @@ id="cart-count"></span></a>
 <div class="jumbotron">
 <div id="carouselExampleIndicators" class="carousel slide">
   <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="3" aria-label="Slide 4"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="4" aria-label="Slide 5"></button>
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="5" aria-label="Slide 6"></button>
+   <c:forEach items="${mainSlide }" var="main" varStatus="i">
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i.index }" <c:if test="${i.index eq 0 }">class="active" aria-current="true"</c:if> aria-label="Slide ${i.count }"></button>
+   </c:forEach>
   </div>
   <div class="carousel-inner">
-    <div class="carousel-item active">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
+  <c:forEach items="${mainSlide }" var="main" varStatus="i">
+    <div class="carousel-item <c:if test="${i.index eq 0 }"> active</c:if>">
+      <img src="${main.filePath }${main.changeName}" class="d-block w-100 img-fluid" alt="...">
     </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
-    </div>
-     <div class="carousel-item active">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
-    </div>
-    <div class="carousel-item">
-      <img src="..." class="d-block w-100 img-fluid" alt="...">
-    </div>
+  </c:forEach>
   </div>
   <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -90,7 +74,7 @@ id="cart-count"></span></a>
 
 <script>
 $(function(){
-	
+	console.log("${mainSlide}");
 	$.ajax({
 		url : "/pjtMungHub/cartCount.sp",
 		data : {userNo : "${loginUser.userNo}"},

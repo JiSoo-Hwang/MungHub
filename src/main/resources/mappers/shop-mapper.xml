@@ -8,11 +8,13 @@
 		<result column="PRODUCT_NO" property="productNo" />
 		<result column="PRODUCT_NAME" property="productName" />
 		<result column="STATUS" property="status" />
-		<result column="SALES_COUNT" property="salesConunt" />
+		<result column="SALES_COUNT" property="salesCount" />
 		<result column="PRICE" property="price" />
 		<result column="DISCOUNT" property="discount" />
 		<result column="CATEGORY_NO" property="categoryNo" />
+		<result column="CATEGORY_NAME" property="categoryName" />
 		<result column="BRAND_CODE" property="brandCode" />
+		<result column="BRAND_NAME" property="brandName" />
 		<result column="ATTACHMENT" property="attachment" />
 	</resultMap>
 
@@ -222,11 +224,76 @@
 		FROM PRODUCT_CATEGORY
 	</select>
 	<select id="selectBrand"
-		resultType="com.kh.pjtMungHub.shop.model.vo.Brand">
+		resultType="com.kh.pjtMungHub.shop.model.vo.Brand"
+		parameterType="string">
 		SELECT BRAND_CODE brandCode,
-		BRAND_NAME brandeName
+		BRAND_NAME brandName,
+		BRAND_SALES brandSales,
+		BRAND_SALES_COUNT brandSalesCount,
+		FILE_PATH||CHANGE_NAME logo
 		FROM BRAND
+	    LEFT JOIN PRODUCT_ATTACHMENT USING (BRAND_CODE)
+		<choose>
+		<when test="orderBy=='BRAND_CODE'">ORDER BY BRAND_CODE</when>
+		<when test="orderBy=='BRAND_CODEdesc'"> ORDER BY BRAND_CODE DESC</when>
+		<when test="orderBy=='BRAND_NAME'"> ORDER BY BRAND_NAME</when>
+		<when test="orderBy=='BRAND_NAMEdesc'"> ORDER BY BRAND_NAME DESC</when>
+		<when test="orderBy=='BRAND_SALES'"> ORDER BY BRAND_SALES</when>
+		<when test="orderBy=='BRAND_SALESdesc'">ORDER BY BRAND_SALES DESC</when>
+		<when test="orderBy=='BRAND_SALES_COUNT'">ORDER BY BRAND_SALES_COUNT</when>
+		<when test="orderBy=='BRAND_SALES_COUNTdesc'">ORDER BY BRAND_SALES_COUNT DESC</when>
+		<otherwise></otherwise>
+		</choose>
 	</select>
+	
+	<select id="selectBrandOne" parameterType="_int"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Brand">
+		SELECT BRAND_CODE brandCode,
+		BRAND_NAME brandName,
+		BRAND_SALES brandSales,
+		BRAND_SALES_COUNT brandSalesCount,
+		FILE_PATH||CHANGE_NAME logo
+		FROM BRAND
+	    JOIN PRODUCT_ATTACHMENT USING (BRAND_CODE)
+	    WHERE BRAND_CODE=#{brandCode}
+	</select>
+	
+	<update id="updateBrandSalesCount"
+	parameterType="java.util.ArrayList">
+	<foreach collection="list" item="arr"
+	open="DECLARE BEGIN" separator=";" close="; END;">
+	UPDATE BRAND SET
+		BRAND_SALES_COUNT=(
+		SELECT NVL(SUM(SALES_COUNT),0)
+		FROM PRODUCT
+		JOIN BRAND USING(BRAND_CODE)
+		WHERE BRAND_CODE=#{arr.brandCode}
+		)
+		WHERE BRAND_CODE=#{arr.brandCode}
+	</foreach>
+	</update>
+	
+	<update id="updateBrandSales"
+	parameterType="java.util.ArrayList">
+	<foreach collection="list" item="arr"
+	open="DECLARE BEGIN" separator=";" close="; END;">
+	UPDATE BRAND SET
+	BRAND_SALES=(SELECT NVL(SUM(SALES_COUNT*(PRICE-(PRICE/DISCOUNT))),0)
+	FROM PRODUCT
+	WHERE BRAND_CODE=#{arr.brandCode}
+	)
+	WHERE BRAND_CODE=#{arr.brandCode}
+	</foreach>
+	</update>
+		
+	<update id="updateBrand"
+	 parameterType="com.kh.pjtMungHub.shop.model.vo.Brand">
+	 UPDATE BRAND SET
+	 BRAND_NAME=#{brandName}
+	 WHERE BRAND_CODE=#{brandCode}
+	 </update>
+
+
 
 	<select id="selectReviewList" parameterType="com.kh.pjtMungHub.shop.model.vo.ParameterVo"
 	resultType="com.kh.pjtMungHub.shop.model.vo.Review">
@@ -557,38 +624,41 @@
 		UPLOAD_DATE uploadDate,
 		FILE_JUSTIFY fileJustify,
 		FILE_PATH filePath,
-		TYPE type,
+		TYPE type
 		<choose>
 			<when test="justifying=='product'">
-				PRODUCT_NO productNo
+				,PRODUCT_NO productNo
 			</when>
 			<when test="justifying=='review'">
-				REVIEW_NO reviewNo
+				,REVIEW_NO reviewNo
 			</when>
 			<when test="justifying=='brand'">
-				BRAND_CODE brandNo
+				,BRAND_CODE brandNo
 			</when>
 			<when test="justifying=='pDetail'">
-			DETAIL_NO detailNo
+				,DETAIL_NO detailNo
 			</when>
 		</choose>
 	FROM PRODUCT_ATTACHMENT
 	WHERE 
 		<choose>
 			<when test="justifying=='product'">
-				PRODUCT_NO
+				PRODUCT_NO=#{number}
 			</when>
 			<when test="justifying=='review'">
-				REVIEW_NO
+				REVIEW_NO=#{number}
 			</when>
 			<when test="justifying=='brand'">
-				BRAND_CODE
+				BRAND_CODE=#{number}
 			</when>
 			<when test="justifying=='pDetail'">
-			DETAIL_NO
+			DETAIL_NO=#{number}
+			</when>
+			<when test="justifying=='main'">
+			FILE_JUSTIFY='main'
 			</when>
 		</choose>
-		=#{number} <!-- 주요키를 담을 공통적으로 사용할 변수  -->
+		
 	ORDER BY FILE_LEVEL
 	</select>
 	
@@ -610,7 +680,10 @@
 				BRAND_CODE=#{number}
 			</when>
 			<when test="justifying=='pDetail'">
-			DETAIL_NO=#{number}
+			 DETAIL_NO=#{number}
+			</when>
+			<when test="justifying=='main'">
+			 FILE_JUSTIFY='main'
 			</when>
 		</choose>
 		
@@ -626,19 +699,22 @@
 		WHERE 
 		<choose>
 			<when test="justifying=='product'">
-				PRODUCT_NO
+				PRODUCT_NO=#{number}
 			</when>
 			<when test="justifying=='review'">
-				REVIEW_NO
+				REVIEW_NO=#{number}
 			</when>
 			<when test="justifying=='brand'">
-				BRAND_CODE
+				BRAND_CODE=#{number}
 			</when>
 			<when test="justifying=='pDetail'">
-			DETAIL_NO
+			DETAIL_NO=#{number}
+			</when>
+			<when test="justifying=='main'">
+			FILE_JUSTIFY='main'
 			</when>
 		</choose>
-		=#{number}
+		
 		WHEN NOT MATCHED
 		THEN
 		INSERT(
@@ -647,19 +723,19 @@
 		CHANGE_NAME,
 		FILE_JUSTIFY,
 		FILE_PATH,
-		TYPE,
+		TYPE
 		<choose>
 			<when test="justifying=='product'">
-				PRODUCT_NO
+				,PRODUCT_NO
 			</when>
 			<when test="justifying=='review'">
-				REVIEW_NO
+				,REVIEW_NO
 			</when>
 			<when test="justifying=='brand'">
-				BRAND_CODE
+				,BRAND_CODE
 			</when>
 			<when test="justifying=='pDetail'">
-			DETAIL_NO
+				,DETAIL_NO
 			</when>
 		</choose>
 		)VALUES(
@@ -668,8 +744,8 @@
 			#{arr.changeName},
 			#{arr.fileJustify},
 			#{arr.filePath},
-			#{arr.type},
-			#{number}
+			#{arr.type}
+			<if test="justifying!='main'">,#{number}</if>
 			)
 	</foreach>
 	</update>
@@ -1038,5 +1114,319 @@ WHERE ORDER_PROCESS=#{category}
 	WHERE MERCHANT_UID=#{merchantUid}
 	
 	</update>
+	
+	<select id="selectOrderListComplte" 
+	parameterType="com.kh.pjtMungHub.shop.model.vo.POrderInfo"
+	resultType="com.kh.pjtMungHub.shop.model.vo.POrderInfo">
+	SELECT 
+	SHOPPING_LIST items
+	FROM PRODUCT_ORDER
+	WHERE USER_NO=#{userNo}
+	AND ORDER_PROCESS=#{process}
+	</select>
+	
+	<select id="selectTopSalesProdcut"
+	parameterType="string"
+	resultMap="productResultSet">
+	SELECT *
+	FROM
+	(SELECT PRODUCT_NO,
+	PRODUCT_NAME,
+	STATUS,
+	SALES_COUNT,
+	PRICE,
+	DISCOUNT,
+	CATEGORY_NO,
+	BRAND_CODE,
+	BRAND_NAME
+	FROM PRODUCT
+	JOIN BRAND USING (BRAND_CODE)
+	ORDER BY <choose>
+	<when test="orderBy=='highest'">SALES_COUNT DESC</when>
+	<when test="orderBy=='lowest'">SALES_COUNT </when>
+	<when test="orderBy=='highestSal'">SALES_COUNT*(PRICE-(PRICE/DISCOUNT)) DESC</when>
+	<when test="orderBy=='lowestSal'">SALES_COUNT*(PRICE-(PRICE/DISCOUNT))</when>
+	</choose>
+	)
+	WHERE ROWNUM BETWEEN 1 AND 5
+	</select>
+	
+	<select id="selectTopSalesBrand"
+	parameterType="string"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Brand">
+	SELECT *
+	FROM(
+	SELECT BRAND_CODE brandCode,
+	BRAND_NAME brandName,
+	BRAND_SALES brandSales,
+	BRAND_SALES_COUNT brandSalesCount,
+    FILE_PATH||CHANGE_NAME logo
+	FROM BRAND
+    LEFT JOIN PRODUCT_ATTACHMENT USING (BRAND_CODE)
+	ORDER BY 
+	
+	<choose>
+	<when test="orderBy=='highest'">BRAND_SALES_COUNT DESC</when>
+	<when test="orderBy=='lowest'">BRAND_SALES_COUNT</when>
+	<when test="orderBy=='highestSal'">BRAND_SALES DESC</when>
+	<when test="orderBy=='lowestSal'">BRAND_SALES</when>
+	</choose>
+	
+	)
+	WHERE ROWNUM BETWEEN 1 AND 5
+	</select>
+	
+	<select id="selectProductCount"
+	parameterType="com.kh.pjtMungHub.shop.model.vo.ParameterVo"
+	resultType="_int">
+	SELECT MAX(ROWNUM)
+	FROM PRODUCT
+	WHERE STATUS =#{justifying}
+    <if test="categoryNo!=0">
+    AND CATEGORY_NO=#{categoryNo}
+    </if>
+	</select>
+	
+	<select id="selectProductControll"
+	parameterType="com.kh.pjtMungHub.shop.model.vo.ParameterVo"
+	resultMap="productResultSet">
+	SELECT PRODUCT_NO,
+        PRODUCT_NAME,
+        STATUS,
+        SALES_COUNT,
+        PRICE,
+        DISCOUNT,
+        CATEGORY_NO,
+        CATEGORY_NAME,
+        BRAND_CODE,
+        BRAND_NAME
+        FROM PRODUCT
+        JOIN BRAND USING (BRAND_CODE)
+        JOIN PRODUCT_CATEGORY USING(CATEGORY_NO)
+        WHERE STATUS =#{justifying}
+        <if test="categoryNo!=0">
+        AND CATEGORY_NO=#{categoryNo}
+        </if>
+        ORDER BY <choose>
+        <when test="orderBy=='PRODUCT_NO'">PRODUCT_NO</when>
+        <when test="orderBy=='PRODUCT_NAME'">PRODUCT_NAME</when>
+        <when test="orderBy=='BRAND_NAME'">BRAND_NAME</when>
+        <when test="orderBy=='PRICE'">PRICE</when>
+        <when test="orderBy=='SALES_COUNT'">SALES_COUNT</when>
+        <when test="orderBy=='PRODUCT_NOdesc'">PRODUCT_NO DESC</when>
+        <when test="orderBy=='PRODUCT_NAMEdesc'">PRODUCT_NAME DESC</when>
+        <when test="orderBy=='BRAND_NAMEdesc'">BRAND_NAME DESC</when>
+        <when test="orderBy=='PRICEdesc'">PRICE DESC</when>
+        <when test="orderBy=='SALES_COUNTdesc'">SALES_COUNT DESC</when>
+        </choose>
+	</select>
+	<insert id="insertBrand" parameterType="string">
+	INSERT INTO BRAND(BRAND_CODE,BRAND_NAME)
+	VALUES(SEQ_BRAND.NEXTVAL,#{brandName})
+	</insert>
 
+	<insert id="insertCategory"
+	parameterType="string">
+	INSERT INTO PRODUCT_CATEGORY(
+	CATEGORY_NO,CATEGORY_NAME
+	)VALUES(
+	SEQ_PCATE.NEXTVAL,#{categoryName}
+	)
+	</insert>
+	<update id="updateCategory"
+	parameterType="com.kh.pjtMungHub.shop.model.vo.Category">
+	UPDATE PRODUCT_CATEGORY SET
+	CATEGORY_NAME=#{categoryName}
+	WHERE CATEGORY_NO=#{categoryNo}
+	</update>
+	<delete id="deleteCategory"
+	parameterType="_int">
+    DELETE FROM PRODUCT_CATEGORY
+    WHERE CATEGORY_NO=#{categoryNo}		
+	
+	</delete>
+	
+	<select id="selectTopBuyer"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Customer">
+	SELECT USER_NO userNo,NAME userName,QUANTITY buyerCount
+	FROM(
+	   SELECT P.USER_NO
+	     ,SUM(REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv)) AS QUANTITY
+	  FROM  PRODUCT_ORDER P 
+	     , (SELECT LEVEL AS lv 
+	          FROM dual 
+	       CONNECT BY LEVEL <![CDATA[<]]>= 50) b
+	 WHERE REGEXP_SUBSTR(P.ITMES_QUANTITY, '[^,]+', 1, b.lv) IS NOT NULL
+	GROUP BY USER_NO
+	ORDER BY QUANTITY DESC)
+	JOIN MEMBER M USING(USER_NO)
+	WHERE ROWNUM BETWEEN 1 AND 5
+	</select>
+	
+	<select id="selectTopSpenders"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Customer">
+	SELECT SUM(TOTAL) spendCount,USER_NO userNo,NAME userName
+    FROM (SELECT CASE 
+         WHEN TOTAL_PRICE <![CDATA[<]]>30000 THEN TOTAL_PRICE-2500
+         WHEN TOTAL_PRICE >30000 THEN TOTAL_PRICE
+         END AS TOTAL,
+         USER_NO
+        FROM PRODUCT_ORDER
+        ORDER BY TOTAL DESC
+        )
+        JOIN MEMBER USING(USER_NO)
+        WHERE ROWNUM BETWEEN 1 AND 5
+        GROUP BY USER_NO,NAME
+	</select>
+	
+	<select id="selectCustomerList"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Customer">
+	SELECT A.USER_NO userNo,B.NAME userName,A.QUANTITY buyerCount,B.TOTAL spendCount
+	FROM(
+	   SELECT P.USER_NO
+	     ,SUM(REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv)) AS QUANTITY
+	  FROM  PRODUCT_ORDER P 
+	     , (SELECT LEVEL AS lv 
+	          FROM dual 
+	       CONNECT BY LEVEL <![CDATA[<]]>= 50) b
+	       
+	 WHERE REGEXP_SUBSTR(P.ITMES_QUANTITY, '[^,]+', 1, b.lv) IS NOT NULL
+	GROUP BY USER_NO
+	ORDER BY QUANTITY DESC) A,(SELECT SUM(TOTAL) TOTAL,USER_NO,NAME
+	    FROM (SELECT CASE 
+	         WHEN TOTAL_PRICE <![CDATA[<]]>30000 THEN TOTAL_PRICE-2500
+	         WHEN TOTAL_PRICE >30000 THEN TOTAL_PRICE
+	         END AS TOTAL,
+	         USER_NO
+	        FROM PRODUCT_ORDER
+	        ORDER BY TOTAL DESC
+	        )
+	        JOIN MEMBER USING(USER_NO)
+	        WHERE USER_NO BETWEEN 1 AND 5
+	        GROUP BY USER_NO,NAME) B
+	WHERE A.USER_NO=B.USER_NO
+	</select>
+	<select id="selectQuestionListControll"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Question">
+	SELECT QUESTION_NO questionNo,
+	PRODUCT_NO productNo,
+	USER_NO userNo,
+	NAME userName,
+	QUESTION_CONTENT content,
+	CATEGORY_NO categoryNo,
+	OPEN_STATUS openStatus,
+	CREATE_DATE createDate,
+	ANSWER_STATUS answerStatus
+	FROM PRODUCT_QUESTION
+	JOIN MEMBER USING (USER_NO)
+	</select>
+	
+	<select id="selectQuestionListUser"
+	parameterType="_int"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Question">
+	SELECT QUESTION_NO questionNo,
+	PRODUCT_NO productNo,
+	USER_NO userNo,
+	NAME userName,
+	QUESTION_CONTENT content,
+	CATEGORY_NO categoryNo,
+	OPEN_STATUS openStatus,
+	CREATE_DATE createDate,
+	ANSWER_STATUS answerStatus
+	FROM PRODUCT_QUESTION
+	JOIN MEMBER USING (USER_NO)
+	WHERE USER_NO =#{userNo}
+	</select>
+	
+	<insert id="replyInquiry"
+	parameterType="com.kh.pjtMungHub.shop.model.vo.Answer">
+	MERGE INTO PRODUCT_ANSWER
+    USING DUAL
+    ON (QUESTION_NO=#{questionNo})
+    WHEN MATCHED THEN
+    UPDATE SET 
+    ANSWER_CONTENT=#{content}
+    WHEN NOT MATCHED THEN
+     INSERT 
+    (ANSWER_NO,
+	QUESTION_NO,
+	USER_NO,
+	ANSWER_CONTENT)
+    VALUES
+    (SEQ_ANSWER.NEXTVAL
+    ,#{questionNo}
+    ,#{userNo}
+    ,#{content})
+	
+	
+	</insert>
+	
+	<update id="updateQustionStatus"
+	parameterType="_int">
+	UPDATE PRODUCT_QUESTION SET
+	ANSWER_STATUS='Y'
+	WHERE QUESTION_NO=#{questionNo}
+	</update>
+	<select id="selectMonthlyTally"
+	parameterType="string"
+	resultType="com.kh.pjtMungHub.shop.model.vo.MonthlyTally">
+	SELECT SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '01', TOTAL_PRICE)) AS "january"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '02', TOTAL_PRICE)) AS "feburary"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '03', TOTAL_PRICE)) AS "march"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '04', TOTAL_PRICE)) AS "april"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '05', TOTAL_PRICE)) AS "may"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '06', TOTAL_PRICE)) AS "june"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '07', TOTAL_PRICE)) AS "july"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '08', TOTAL_PRICE)) AS "august"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '09', TOTAL_PRICE)) AS "september"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '10', TOTAL_PRICE)) AS "october"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '11', TOTAL_PRICE)) AS "november"
+     , SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'), '12', TOTAL_PRICE)) AS "december"
+  FROM PRODUCT_ORDER
+ WHERE PAY_DATE BETWEEN TO_DATE(#{start}, 'YYYY-MM-DD')
+                    AND TO_DATE(#{end}, 'YYYY-MM-DD')
+	
+	
+	</select>
+	<select id="selectMonthlyTallyCount"
+	resultType="com.kh.pjtMungHub.shop.model.vo.MonthlyTally">
+	SELECT 
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'01',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "january",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'02',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "feburary",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'03',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "march",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'04',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "april",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'05',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "may",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'06',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "june",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'07',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "july",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'08',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "august",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'09',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "september",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'10',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "october",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'11',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "november",
+    SUM(DECODE(TO_CHAR(PAY_DATE, 'MM'),'12',REGEXP_SUBSTR(P.ITMES_QUANTITY,'[^,]+', 1, b.lv))) AS "december"
+	  FROM  PRODUCT_ORDER P 
+	     , (SELECT LEVEL AS lv 
+	          FROM dual 
+	       CONNECT BY LEVEL <![CDATA[<]]>= 50) b
+	 WHERE REGEXP_SUBSTR(P.ITMES_QUANTITY, '[^,]+', 1, b.lv) IS NOT NULL
+        AND PAY_DATE BETWEEN TO_DATE(#{start}, 'YYYY-MM-DD')
+                    AND TO_DATE(#{end}, 'YYYY-MM-DD')
+	
+	</select>
+	
+	
+	<select id="selectMainSlide"
+	resultType="com.kh.pjtMungHub.shop.model.vo.Attachment">
+	SELECT FILE_LEVEL fileLev,
+	ORIGIN_NAME originName,
+	CHANGE_NAME changeName,
+	UPLOAD_DATE status,
+	FILE_JUSTIFY fileJustify,
+	FILE_PATH filePath,
+	TYPE type
+	FROM PRODUCT_ATTACHMENT
+	WHERE FILE_JUSTIFY='main'
+	</select>
+	
+	
+	
 </mapper>

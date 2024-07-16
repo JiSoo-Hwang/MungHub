@@ -5,13 +5,60 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<style>
+
+	#Enroll-Rule-Area{
+		padding-top:5%;
+		height:100%;
+		width:100%;
+	}
+	#Enroll-Rule-Area>div{
+		margin:auto;
+		width:40%;
+	}
+	.enrollTitle{
+		margin:auto;
+		width:15%;
+		border-bottom:1px solid lightgray;
+		padding-bottom:15px;
+	}
+	.rule{
+		height:25%;
+	}
+	.agreeAll>*{
+		margin-top:30px;
+		margin-left:10px;
+		padding-bottom:15px;
+	}
+	div>textArea, .checkArea{
+		margin-left:10%;
+		width:80%;
+	}
+	.checkArea>input[type=radio]{
+		margin-left:10px;
+	}
+	.rule label{
+		margin-left:5px;
+		margin-right:15px;
+		margin-bottom:30px;
+	}
+	.rule>input{
+		margin-left:10px;
+	}
+
+</style>
 </head>
 <body>
 	<%@ include file="/WEB-INF/views/common/header.jsp" %>
 	<div id="Enroll-Rule-Area">
+		<div class="enrollTitle">
+			<h3 align="center">이용 약관</h3>
+		</div>
+		<div class="agreeAll">
 		<input type="checkbox" id="allAgree"><label for="allAgree">전부 동의합니다.</label>
+		</div>
 		<div class="rule">
-			<textArea readOnly cols="30" rows="6" >
+			<textArea readOnly cols="30" rows="6" style="resize:none;">
 제 1 조 (목적) 
 이 약관은 MUNGHUB(이하 "협회")가 제공하는 제반 서비스의 이용에 대한 회원의 권리와 의무, 기타 필요한 사항을 정함에 있습니다.
 
@@ -122,12 +169,13 @@
 ①이 약관은 2009년 4월 1일부터 적용됩니다. 
 ②개정된 이용약관의 적용일자 이전 가입자 또한 개정된 이용약관의 적용으로 대체합니다. 	
 			</textArea><br>
-			<input type="radio" name="yakgwan1" id="Y" value="y"><label for="Y">동의합니다.</label>
-			<input type="radio" name="yakgwan1" id="N" value="n"><label for="N">동의하지 않습니다.</label>
+			<div class="checkArea">
+				<input type="radio" name="yakgwan1" id="Y" value="y"><label for="Y">동의합니다.</label>
+				<input type="radio" name="yakgwan1" id="N" value="n"><label for="N">동의하지 않습니다.</label>
+			</div>
 		</div>
-		<br><br><br>
 		<div class="rule">
-			<textArea readOnly cols="30" rows="6" >
+			<textArea readOnly cols="30" rows="6" style="resize:none;">
 MUNGHUB는 (이하 '협회'는) 고객님의 개인정보를 중요시하며, "정보통신망 이용촉진 및 정보보호"에 관한 법률을 준수하고 있습니다.
 
 협회는 개인정보취급방침을 통하여 고객님께서 제공하시는 개인정보가 어떠한 용도와 방식으로 이용되고 있으며, 개인정보보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.
@@ -202,11 +250,12 @@ MUNGHUB는 (이하 '협회'는) 고객님의 개인정보를 중요시하며, "�
 2.정보보호마크인증위원회 (www.eprivacy.or.kr/02-580-0533~4)
 3.대검찰청 인터넷범죄수사센터 (http://icic.sppo.go.kr/02-3480-3600)
 4.경찰청 사이버테러대응센터 (www.ctrc.go.kr/02-392-0330)
-			</textArea><br>
-			<input type="radio" name="yakgwan2" id="y" value="y"><label for="y">동의합니다.</label>
-			<input type="radio" name="yakgwan2" id="n" value="n"><label for="n">동의하지 않습니다.</label>
+			</textArea>
+			<div class="checkArea">
+				<input type="radio" name="yakgwan2" id="y" value="y"><label for="y">동의합니다.</label>
+				<input type="radio" name="yakgwan2" id="n" value="n"><label for="n">동의하지 않습니다.</label>
+			</div>
 		</div>
-		<br><br>
 		<div class="joinModalBtn">
 			<button type="button" data-bs-toggle="modal" data-bs-target="#joinModal" disabled>반려견주(일반 회원)로 가입</button>	
 			<button type="button" onclick="teacherCheck();" data-bs-toggle="modal" data-bs-target="#joinModal" disabled>반려견돌보미(반려견유치원 선생님)로 가입</button>
@@ -228,17 +277,17 @@ MUNGHUB는 (이하 '협회'는) 고객님의 개인정보를 중요시하며, "�
 			$("#allAgree").on("click",function(){
 			var agree = $("#allAgree").prop("checked");
 				if(agree){
-					$(".rule>input[value='y']").prop("checked",true);
+					$(".checkArea>input[value='y']").prop("checked",true);
 				}else{
-					$(".rule>input[value='n']").prop("checked",true);
+					$(".checkArea>input[value='n']").prop("checked",true);
 				}
 			})
 		})
 		$(function(){
 			var btn=$(".joinModalBtn>button");
-			$(".rule>input[type=radio]").on("click",function(){				
+			$(".checkArea>input[type=radio]").on("click",function(){				
 				var check=0;
-				$(".rule>input[value='y']").each(function(){
+				$(".checkArea>input[value='y']").each(function(){
 					var tf=$(this).prop("checked");
 					if(tf){
 						check+=1;

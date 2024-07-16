@@ -51,8 +51,6 @@
 				<h3>게시글 관리</h3>
 			</div>
 			<div class="manage-member">
-				<h3>회원 관리</h3>
-				
 				<div class="search-member">
 					<h5>회원 검색</h5>
 					<input type="text" id="searchUserId" placeholder="찾고 싶은 회원의 아이디를 입력하세요"><button onclick="searchUserId();">검색</button>

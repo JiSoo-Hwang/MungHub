@@ -17,5 +17,6 @@ public class MessageVO {
 	private String chatContent;
 	private Date chatDate;
 	private String chatWriter;
+	private String status;
 
 }

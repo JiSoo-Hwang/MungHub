@@ -13,7 +13,7 @@
 	}
 	.petInfo, .newPet-member, .newPet-new{
 		position:relative;
-		height:300px;
+		height:310px;
 		background-color:#FFEAE3;
 		border-radius:5px;
 	}

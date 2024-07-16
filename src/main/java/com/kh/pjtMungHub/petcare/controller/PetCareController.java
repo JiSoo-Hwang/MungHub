@@ -223,11 +223,14 @@ public class PetCareController {
 		//결제성공 후 각 paymentStatus '결제완료' 변경작업
 		if(Integer.parseInt(payment.getDifferentNo())==1) {
 			
-			int result = petCareService.updateReservation(String.valueOf(petCareService.selectReservationId(payment)));
+			String reservationNo = String.valueOf(petCareService.selectReservationId(payment));
 			
-			if(result>0) {
-				session.setAttribute("alertMsg", "결제성공!! 내역을 확인해주세요.");
-				mv.addObject("p",payment).setViewName("petCare/payDetail"); 
+			int result = petCareService.updateReservation(reservationNo);
+			int result2 = petCareService.updatePayment(reservationNo);
+			
+			if(result*result2>0) {
+					session.setAttribute("alertMsg", "결제성공!! 내역을 확인해주세요.");
+					mv.addObject("p",payment).setViewName("petCare/payDetail"); 
 			}else {
 				mv.addObject("alertMsg","결제실패..관리자에게 문의해주세요").setViewName("redirect:/houseList.re"); 
 			}
@@ -235,8 +238,9 @@ public class PetCareController {
 		}else if(Integer.parseInt(payment.getDifferentNo())==2) {
 			
 			int result = petCareService.updateHouseRe(payment.getReservationHouseNo());
+			int result2 = petCareService.updatePayment2(payment.getReservationHouseNo());
 			
-			if(result>0) {
+			if(result*result2>0) {
 				session.setAttribute("alertMsg", "결제성공!! 내역을 확인해주세요.");
 				mv.addObject("p",payment).setViewName("petCare/payDetail"); 
 			}else {
@@ -245,6 +249,16 @@ public class PetCareController {
 		}
 		return mv;
 	}
+	
+	//결제 statusName
+	@ResponseBody
+	@RequestMapping("statusName.re")
+	public Payment statusName(String paymentId) {
+		
+		Payment statusName = petCareService.statusName(paymentId);
+		return statusName;
+	}
+	
 	
 	//장기돌봄 예약 리스트로 이동
 	@RequestMapping("houseList.re")
@@ -312,6 +326,10 @@ public class PetCareController {
 		ArrayList<Environment> env = petCareService.selectEnvironment(houseNo);//환경
 		ArrayList<SupplyGuide> sup = petCareService.selectSupplyGuide(houseNo);//지원서비스
 		
+		//Disabled 를 위해 예약된 Date 정보 불러오기
+		ArrayList<HouseReservation> reList = petCareService.selectReList(houseNo);
+		
+		model.addAttribute("reList", reList); //Disabled 를 위해 예약된 Date 정보
 		model.addAttribute("house", house); //집번호,집주인이름,주소,간단소개,자세한소개,근처병원,사진이름/경로
 		model.addAttribute("price",price); //숙박 일정에 따른 요금정보 (ex : 1박2일 = 4만원..)
 		model.addAttribute("cer",cer); //인증정보(ex: 신원인증..)
@@ -428,7 +446,7 @@ public class PetCareController {
 	        options.addArguments("--headless"); // 브라우저 창을 열지 않음
 	        WebDriver driver = new ChromeDriver(options);
 	        // 해당 url 경로 페이지 로드
-	        driver.get("https://place.map.kakao.com/12401961");
+	        driver.get(url);
 	        // 페이지가 완전히 로드될 때까지 기다림 
 	        //(이게 결정적인 해결방안 이었음. setTimeout 과 비슷한역할)
 	        WebDriverWait wait = new WebDriverWait(driver, 10); // timeoutInSeconds 값을 사용
@@ -467,8 +485,9 @@ public class PetCareController {
 	@GetMapping("hospital.re")
 	public ModelAndView hospitalReservation(ModelAndView mv,HospitalRe hosRe) {
 		
-		mv.addObject("hosRe",hosRe).setViewName("petCare/hospitalReservation");
-		
+		String hosName = hosRe.getHosName();
+		ArrayList<HospitalRe> reList = petCareService.selectPreHos(hosName);
+		mv.addObject("hosRe",hosRe).addObject("reList",reList).setViewName("petCare/hospitalReservation");
 		return mv;
 	}
 	
@@ -559,8 +578,6 @@ public class PetCareController {
 			hosRe.setChangeName("resources/uploadFiles/hospital/"+changeName);
 		}
 		
-		System.out.println(hosRe);
-	
 		int result = petCareService.hospitalEnrollUp(hosRe);
 		
 		if(result>0) {
@@ -600,8 +617,6 @@ public class PetCareController {
 		String petType = petCareService.selectPetType(hosRe);
 		hosRe.setPetTypeNo(petType);
 		
-		System.out.println(hosRe);
-		
 		mv.addObject("hosRe",hosRe).setViewName("petCare/hospitalDetail");
 		
 		return mv;
@@ -619,6 +634,32 @@ public class PetCareController {
 			mv.addObject("alertMsg","예약 삭제실패.. 관리자에게 문의").setViewName("redirect:/hospital.ho");
 		}
 		return mv;
+	}
+	
+	//메인페이지
+	@ResponseBody
+	@RequestMapping("mainSitter.re")
+	public PetSitter mainSitter() {
+		PetSitter sitList = petCareService.mainSitter();
+		return sitList;
+	}
+	@ResponseBody
+	@RequestMapping("mainHouse.re")
+	public House mainHouse() {
+		House HouseList = petCareService.mainHouse();
+		return HouseList;
+	}
+	@ResponseBody
+	@RequestMapping("mainHospital.re")
+	public HospitalRe mainHospotal() {
+		HospitalRe hosRe = petCareService.mainHospital();
+		return hosRe;
+	}
+	
+	
+	@RequestMapping("css.re")
+	public String cssRe() {
+		return "petCare/css";
 	}
 	
 	

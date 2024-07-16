@@ -1,21 +1,14 @@
 package com.kh.pjtMungHub.member.controller;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -87,6 +80,8 @@ public class MemberController {
 			}
 		}
 		session.setAttribute("petList",petList);
+		ArrayList<Breed> breed=service.selectBreedList();
+		session.setAttribute("breed", breed);
 		session.setAttribute("petPhotoList",petPhotoList);
 		return "member/memberMyPage";
 	}
@@ -141,7 +136,7 @@ public class MemberController {
 			if(teacher!=null) {				
 				for(Member me:teacher) {
 					tList.add(me);
-					if(me.getStatus()=="N") {						
+					if(me.getStatus().equals("N")) {						
 						count++;
 					}
 				}
@@ -168,7 +163,6 @@ public class MemberController {
 			session.setAttribute("loginUser", loginUser);
 			ArrayList<MessageVO> cList=service.getChatList(loginUser);
 			ArrayList<MessageVO> chatList=new ArrayList<MessageVO>();
-			System.out.println(cList);
 			for(MessageVO c:cList) {
 				c.setMasterNo(loginUser.getUserNo());
 				chatList.add(service.getNewChat(c));
@@ -254,8 +248,6 @@ public class MemberController {
 
 	@PostMapping("enrollPet.me")
 	public String enrollPet(Pet p, MultipartFile upFile, HttpSession session) {
-		System.out.println(p);
-		System.out.println(upFile);
 		Member m=(Member)session.getAttribute("loginUser");
 		int result1;
 		int result2;
@@ -274,7 +266,6 @@ public class MemberController {
 			result1=service.insertPetPhoto(petPhoto);
 			if(result1>0) {
 				p.setPhotoNo(pNum);
-				System.out.println(p);
 			}
 		}else {
 			result1=1;
@@ -390,7 +381,6 @@ public class MemberController {
 	@GetMapping("disableUser.me")
 	public String disableUser(Member m, int disable, HttpSession session) {
 		String msg;
-		System.out.println(disable);
 		session.setAttribute("disable", disable);
 		session.setAttribute("disableUser", m);
 		int result=service.disableUser(m);
@@ -434,7 +424,6 @@ public class MemberController {
 		Member mem=(Member)session.getAttribute("loginUser");
 		String msg="";
 		String link="";
-		System.out.println(m);
 		/*
 		 * int result1=service.newMaster(m);
 		 */		
@@ -550,7 +539,6 @@ public class MemberController {
 		        // 응답 데이터 형식은 Hashmap 으로 지정
 		        ResponseEntity<HashMap> userResult = restTemplate.postForEntity(userInfoURL, userInfoEntity, HashMap.class);
 		        Map<String, String> userResultMap = (Map)userResult.getBody().get("kakao_account");
-		        System.out.println(userResult);
 		        // 세션에 저장된 state 값 삭제
 		        session.removeAttribute("state");
 		        // 조회를 위한 데이터 정리
@@ -579,7 +567,6 @@ public class MemberController {
 			msg=loginUser.getUserId()+"님 환영합니다.";
 			session.setAttribute("loginUser", loginUser);
 			ArrayList<MessageVO> cList=service.getChatList(loginUser);
-			System.out.println(cList);
 			ArrayList<MessageVO> chatList=new ArrayList<MessageVO>();
 			for(MessageVO c:cList) {
 				c.setMasterNo(loginUser.getUserNo());
@@ -591,6 +578,7 @@ public class MemberController {
 			session.setAttribute("sitterUser", sitterUser);
 			msg=sitterUser.getPetSitterName()+" 펫시터님 환영합니다.";
 			ArrayList<MessageVO> cList=service.getSitterChatList(sitterUser);
+			System.out.println(cList);
 			ArrayList<MessageVO> chatList=new ArrayList<MessageVO>();
 			ArrayList<Member> masterList=new ArrayList<>();
 			for(MessageVO c:cList) {
@@ -603,6 +591,7 @@ public class MemberController {
 			session.setAttribute("masterList", masterList);
 			session.setAttribute("chatList", chatList);
 			session.removeAttribute("loginUser");
+			System.out.println(chatList);
 		}else {			
 			msg="해당하는 회원을 찾을 수 없습니다. 회원 가입 후 이용해 주세요.";
 		}
@@ -742,7 +731,11 @@ public class MemberController {
 		}
 		return sitter;
 	}
-
+	@ResponseBody
+	@GetMapping("/read.chat")
+	public int chatRead(HttpSession session, MessageVO msg) {
+		return service.chatRead(msg);
+	}
 	public String generateState()
 	{
 	    SecureRandom random = new SecureRandom();

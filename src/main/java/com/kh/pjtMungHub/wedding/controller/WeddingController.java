@@ -150,8 +150,10 @@ public class WeddingController {
 	@GetMapping("update.wd")
 	public ModelAndView updateWeddingView(int weddingNo, ModelAndView mv) {
 		Wedding w = service.selectWedding(weddingNo);
+		ArrayList<Pet> petList = service.selectPets(w.getUserNo());
 		Pet p = service.selectPetByNo(Integer.parseInt(w.getPetNo()));
-		mv.addObject("wedding", w).addObject("pet", p).setViewName("wedding/updateWeddingView");
+		Pet partnerPet = service.selectPetByNo(w.getPartnerNo());
+		mv.addObject("wedding", w).addObject("petList",petList).addObject("pet", p).addObject("partnerPet",partnerPet).setViewName("wedding/updateWeddingView");
 		return mv;
 	}
 

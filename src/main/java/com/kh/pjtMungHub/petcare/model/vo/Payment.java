@@ -23,6 +23,7 @@ public class Payment {
     private String paymentMethod; 
     private String productName;
     private int paymentStatus; 
+    private String statusName; 
     private String differentNo;
     private String reservationNo;
     private String reservationHouseNo;

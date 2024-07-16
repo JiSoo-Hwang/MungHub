@@ -49,6 +49,11 @@ public interface PetCareService {
 	//결제확정 후 각 paymentStatus 업뎃
 	int updateReservation(String reservationNo);
 	int updateHouseRe(String reservationHouseNo);
+	//결제테이블, 결제상태변경
+	int updatePayment(String reservationNo);
+	int updatePayment2(String reservationHouseNo);
+	//결제 statusName
+	Payment statusName(String paymentId);
 	
 	
 	//장기돌봄 페이지 처음화면
@@ -74,7 +79,8 @@ public interface PetCareService {
 	//집 후기정보
 	int reviewCount(int houseNo);
 	ArrayList<LongReview> selectLongReview(int houseNo,PageInfo pi);
-	
+	//Disabled 를 위해 예약된 Date 정보 불러오기
+	ArrayList<HouseReservation> selectReList(int houseNo);
 	
 	
 	//장기돌봄 예약저장
@@ -85,7 +91,8 @@ public interface PetCareService {
 	int houserReservationNo();
 	
 	
-	//병원정보
+	//병원 접수페이지로
+	ArrayList<HospitalRe> selectPreHos(String hosName);
 	//병명 가져오기
 	List <String> diseaseName(HashMap<String,Object> symMap);
 	//예약정보 저장하기
@@ -106,6 +113,10 @@ public interface PetCareService {
 	int hospitalDelete(int hosReNo);
 	
 	
+	//메인페이지
+	PetSitter mainSitter();
+	House mainHouse();
+	HospitalRe mainHospital();
 	
 	
 

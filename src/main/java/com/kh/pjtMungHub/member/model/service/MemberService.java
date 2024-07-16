@@ -2,6 +2,8 @@ package com.kh.pjtMungHub.member.model.service;
 
 import java.util.ArrayList;
 
+import org.springframework.web.socket.TextMessage;
+
 import com.kh.pjtMungHub.chatting.vo.MessageVO;
 import com.kh.pjtMungHub.common.model.vo.PetPhoto;
 import com.kh.pjtMungHub.kindergarten.model.vo.Kindergarten;
@@ -55,4 +57,8 @@ public interface MemberService {
 	ArrayList<MessageVO> getSitterChatList(PetSitter sitterUser);
 	Member selectMaster(Member m);
 	LocalDateTime getRestrictedUntil(int userNo);
+	int chatUpload(MessageVO msg);
+	int chatRead(MessageVO msg);
+	int saveChat(MessageVO msg);
+	int deleteChat(MessageVO msg);
 }

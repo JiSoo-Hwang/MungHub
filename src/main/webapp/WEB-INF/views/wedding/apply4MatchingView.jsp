@@ -199,6 +199,9 @@ $("#petNo").change(function () {
 			if(gender=="${partnerPet.petGender}"){
 				alert("성별이 같은 강아지는 매칭 신청이 불가합니다8ㅅ8");
 				$("#defaultOption").prop("selected",true);
+				$("#breed").val("");
+				$("#petAge").val("");
+				$("#weight").val("");
 			}else{
 			$("#breed").val(pet.breed);
 			$("#petAge").val(pet.petAge);

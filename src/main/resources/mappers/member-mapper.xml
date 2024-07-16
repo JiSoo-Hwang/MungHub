@@ -84,7 +84,7 @@
 		SELECT KIND_NO kindNO, DIRECTOR_ID directorId, KIND_NAME kindName FROM KINDERGARTEN WHERE DIRECTOR_ID=#{userNo} AND STATUS='Y'
 	</select>
 	<select id="searchTeacherByKind" parameterType="Kindergarten" resultType="Member">
-		SELECT USER_ID userId,USER_NO userNo,NAME name,PHONE phone,EMAIL email,ADDRESS address,PET_YN petYN,KIND_NAME kindName,JOIN_DATE joinDate FROM MEMBER JOIN KINDERGARTEN USING(KIND_NO) WHERE KIND_NO=#{kindNo}
+		SELECT USER_ID userId,USER_NO userNo,NAME name,PHONE phone,EMAIL email,ADDRESS address,PET_YN petYN,KIND_NAME kindName,JOIN_DATE joinDate, M.STATUS status FROM MEMBER M JOIN KINDERGARTEN USING(KIND_NO) WHERE KIND_NO=#{kindNo}
 	</select>
 	<update id="acceptTeacher" parameterType="Member">
 		UPDATE MEMBER SET USER_GRADE=#{userGrade}, STATUS='Y' WHERE USER_NO=#{userNo}
@@ -127,10 +127,10 @@
 		SELECT PET_SITTER_NO petSitterNo, PET_SITTER_NAME petSitterName, INTRODUCE introduce, DOG_KEYWORD dogKeyword, TYPE_KEYWORD typeKeyword, PHONE phone, EMAIL email, ORIGIN_NAME originName, FILE_PATH filePath, STATUS status FROM PET_SITTER WHERE PET_SITTER_NO=#{petSitterNo}
 	</select>
 	<select id="getChatList" parameterType="Member" resultType="Chat">
-		SELECT SITTER_NO sitterNo FROM CHAT WHERE MASTER_NO=#{userNo} GROUP BY SITTER_NO
+		SELECT SITTER_NO sitterNo FROM CHAT WHERE MASTER_NO=#{userNo} AND STATUS='Y' GROUP BY SITTER_NO
 	</select>
 	<select id="getNewChat" parameterType="Chat" resultType="Chat">
-		SELECT SITTER_NO sitterNo, MASTER_NO masterNo, CHAT_CONTENT chatContent, CHAT_DATE chatDate, CHAT_WRITER chatWriter FROM (SELECT * FROM CHAT WHERE SITTER_NO=#{sitterNo} ORDER BY CHAT_NO DESC) WHERE ROWNUM=1 
+		SELECT SITTER_NO sitterNo, MASTER_NO masterNo, CHAT_CONTENT chatContent, CHAT_DATE chatDate, CHAT_WRITER chatWriter FROM (SELECT * FROM CHAT WHERE SITTER_NO=#{sitterNo} AND MASTER_NO=#{masterNo} ORDER BY CHAT_NO DESC) WHERE ROWNUM=1 
 	</select>
 	<select id="getSitterList" resultType="PetSitter">
 		SELECT PET_SITTER_NO petSitterNo, PET_SITTER_NAME petSitterName, INTRODUCE introduce, DOG_KEYWORD dogKeyword, TYPE_KEYWORD typeKeyword, PHONE phone, EMAIL email, ORIGIN_NAME originName, FILE_PATH filePath, STATUS status FROM PET_SITTER
@@ -150,4 +150,16 @@
 	<select id="getRestrictedUntil" parameterType="_int" resultType="java.time.LocalDateTime">
 	SELECT RESTRICTED_UNTIL FROM MEMBER WHERE USER_NO = #{userNo}
 	</select>
+	<insert id="chatUpload" parameterType="Chat">
+		INSERT INTO CHAT VALUES(SEQ_CHAT.NEXTVAL,#{sitterNo},#{masterNo},#{chatContent},SYSDATE,#{chatWriter},'N')
+	</insert>
+	<update id="chatRead" parameterType="Chat">
+		UPDATE CHAT SET STATUS='Y' WHERE MASTER_NO=#{masterNo} AND SITTER_NO=#{sitterNo} AND CHAT_WRITER='SITTER'
+	</update>
+	<update id="saveChat" parameterType="Chat">
+		UPDATE CHAT SET STATUS=#{status},CHAT_CONTENT=#{chatContent},CHAT_WRITER=#{chatWriter},CHAT_DATE=SYSDATE WHERE SITTER_NO=#{sitterNo} AND MASTER_NO=#{masterNo}
+	</update>
+	<update id="deleteChat" parameterType="Chat">
+		UPDATE CHAT SET STATUS='N' WHERE MASTER_NO=#{masterNo} AND SITTER_NO=#{sitterNo}
+	</update>
 </mapper>

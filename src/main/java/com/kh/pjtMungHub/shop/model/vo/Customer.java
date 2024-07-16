@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Brand {
+public class Customer {
 
-	private int brandCode;
-	private String brandName;
-	private int brandSales;
-	private int brandSalesCount;
-	private String logo;
+	private int userNo;
+	private String userName;
+	private int buyerCount;
+	private int spendCount;
 }

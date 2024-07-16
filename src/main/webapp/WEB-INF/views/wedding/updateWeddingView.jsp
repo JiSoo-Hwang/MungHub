@@ -41,7 +41,7 @@ li {
 							<img class="card-img-top" src="" alt="" style="width: 100%">
 							<div class="card-img-overlay">
 
-								<p class="card-text">강아지 사진을 올려주세요!</p>
+								<p class="card-text">강아지 사진을 다시 올려주세요!</p>
 								<input type="file" name="reupFile" id="reupFile" onchange="loadImg(this,1);" required></input> <label
 									for="reupFile"><img
 									src="/pjtMungHub/${wedding.changeName }"
@@ -55,7 +55,14 @@ li {
 						<thead>
 							<tr>
 								<th>이름</th>
-								<td>${pet.petName }</td>
+								<td>
+								<select name="petNo" id="petNo">
+								<option id="defaultOption">반려견을 선택해주세요</option>
+								<c:forEach items="${petList }" var="p">
+								<option value="${p.petNo }" <c:if test="${p.petNo == wedding.petNo}">selected</c:if>>${p.petName }</option>
+								</c:forEach>
+								</select>
+								</td>
 							</tr>
 						</thead>
 						<tbody>
@@ -98,13 +105,13 @@ li {
 							</tr>
 							<tr>
 								<th>특이사항</th>
-								<td><textarea rows="4" cols="50" name="petNote">${wedding.petIntro}</textarea></td>
+								<td><textarea rows="4" cols="50" name="petNote">${wedding.petNote}</textarea></td>
 							</tr>
 							<tr>
 								<td></td>
 								<td style="text-align: center;">
 									<a href="wedList.wd" class="btn btn-outline-primary">목록으로</a>
-									<button type="submit" class="btn btn-outline-success">신청하기</button>
+									<button type="submit" class="btn btn-outline-success">수정하기</button>
 								</td>
 							</tr>
 						</tbody>
@@ -148,6 +155,40 @@ $(function () {
 	$("#meetingMethod").val("${wedding.meetingMethod}").prop("selected",true);
 });
 
+$("#petNo").change(function () {
+	var petNo = $(this).val();
+	$.ajax({
+		url:"${pageContext.request.contextPath}/getPetInfo.wd",
+		type: "get",
+		data:{petNo:petNo},
+		success: function (pet) {
+			var gender = pet.petGender;
+			if(gender=="${partnerPet.petGender}"){
+				alert("성별이 같은 강아지는 매칭 신청이 불가합니다8ㅅ8");
+				$("#defaultOption").prop("selected",true);
+				$("#breed").val("");
+				$("#petAge").val("");
+				$("#weight").val("");
+			}else{
+			$("#breed").val(pet.breed);
+			$("#petAge").val(pet.petAge);
+			$("#weight").val(pet.weight);
+			switch (gender) {
+			case 'M':
+				$("#gender").val('왕자님');
+				break;
+			case 'F':
+				$("#gender").val('공주님');
+				break;
+			}
+			}
+		},
+		error: function () {
+			console.log("반려견 정보 불러오기 실패");
+		}
+	});
+	
+});
 /* 혈통 관련 안내 팝업 */
 var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
 var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {

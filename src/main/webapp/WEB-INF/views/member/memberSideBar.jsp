@@ -13,6 +13,7 @@
 	.left-sidebar>ul{
 		list-style-type:none;
 		background-color:#F4D3D3;
+		width:220px;
 		margin:0;
 		padding:0;
 		border-radius:3px;
@@ -20,13 +21,17 @@
 		height:auto;
 		position:fixed;
 	}
-
+	.sidebar-title>h3{
+		line-height: 200%;
+	}
 	.sidebar-link{
 		background-color:#FFEAE3;
-		margin:5px;
+		margin:8px;
 	}
 	.sidebar-link>a{
 		text-decoration:none;
+		font-size:18px;
+		line-height:180%;
 		color: #492F10;
 	}
 		div .left, .right{

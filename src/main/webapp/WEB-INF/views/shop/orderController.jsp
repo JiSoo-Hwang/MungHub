@@ -69,6 +69,7 @@
         <a href="/pjtMungHub/adminPage/orderControll">주문 관리</a>
         <a href="/pjtMungHub/adminPage/productControll">제품 관리</a>
         <a href="/pjtMungHub/adminPage/customerControll">고객 관리</a>
+        <a href="/pjtMungHub/adminPage/eventControll">이벤트 관리</a>
     </div>
 
     <div class="main-content">

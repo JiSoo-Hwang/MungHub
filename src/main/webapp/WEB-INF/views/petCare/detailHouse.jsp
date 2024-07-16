@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"
     import="java.util.Date, java.text.SimpleDateFormat"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%
 	Date today = new Date();
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -14,6 +15,7 @@
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=3dcfbff0a780d5171a2a2f039fc60ac0&libraries=services,clusterer,drawing"></script>
 <!-- fullcalender -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+
 
 <title>집 소개 및 예약</title>
 <style>
@@ -299,13 +301,6 @@
 				e.preventDefault();
 				prevSlide();
 			});
-			/*
-			//이미지 클릭시 해당 href 이동함수
-			$('.slide img').click(function(e){
-				e.preventDefault();
-				window.open($(this).parent('a').attr('href')); //URL 새탭에서 열기
-			});
-			*/
 		});
 	</script>
 		
@@ -419,7 +414,16 @@
 	</form>
       
       <br><br>
-    
+      
+	<c:forEach var="r" items="${reList}" varStatus="status">
+	    <input type="hidden" class="reservation-id" value="${r.reservationHouseNo}">
+	    <input type="hidden" class="disabled-date" value="${r.startDate}">
+	    <input type="hidden" class="disabled-start" value="${r.startDate}">
+	    <input type="hidden" class="disabled-end" value="${r.endDate}">
+	</c:forEach>
+	<input type="hidden" id="totalReservations" value="${fn:length(reList)}">
+
+
     
     <script>
     //=============== 지도 api ========================
@@ -472,9 +476,7 @@
 		};
 		
 		//============= 요금표 ===================
-			
 		var stayNo = "";//숙박일정 숫자화
-		
 		$(function(){
 			$('.click-row').on('click',function(){
 				$('.click-row').removeClass('selected-row');
@@ -490,33 +492,88 @@
 		});
 		
 		//============== 달력 ===================
-		$(function() {
-			var formattedDate = $('#formattedDate').val(); //오늘날짜기준
+		$(document).ready(function() {
+		    var disabledDates = [];
+		    
+		    // 예약 정보를 배열에 추가
+		    $('.reservation-id').each(function(index) {
+		        var reservation = {
+		            reservationId: $(this).val(),
+		            start: $('.disabled-start').eq(index).val(),
+		            end: $('.disabled-end').eq(index).val()
+		        };
+		        disabledDates.push(reservation);
+		    });
+		    
+		    console.log('예약불가 날짜들:', disabledDates);
+
+		    // disabledDates 배열을 평탄화하여 모든 날짜를 포함하는 단일 배열 생성
+		    var allDisabledDates = disabledDates.flatMap(date => {
+		        const dates = [];
+		        let currentDate = new Date(date.start);
+		        const endDate = new Date(date.end);
+
+		        while (currentDate <= endDate) {
+		            dates.push(new Date(currentDate));
+		            currentDate.setDate(currentDate.getDate() + 1);
+		        }
+
+		        return dates;
+		    });
+
+		    console.log('평탄화 작업한 배열:', allDisabledDates);
+
+		    var formattedDate = $('#formattedDate').val(); // 오늘 날짜 기준
 		    var calendarEl = $('#calendar')[0];
 		    var calendar = new FullCalendar.Calendar(calendarEl, {
 		        initialView: 'dayGridMonth',
 		        locale: 'ko', // 한글 로케일 설정
 		        headerToolbar: {
-                    left: '',
-                    center: 'title',
-                    right: 'prev,next'
-                },
-		        validRange:{ //오늘날짜 이전 막아주기
-		        	start : formattedDate
+		            left: '',
+		            center: 'title',
+		            right: 'prev,next'
 		        },
+		        validRange: { // 오늘 날짜 이전 막아주기
+		            start: formattedDate
+		        },
+		        selectAllow: function(selectInfo) {
+		            var selectedDate = new Date(selectInfo.startStr);
+
+		            return !allDisabledDates.some(disabledDate => {
+		                return selectedDate.getTime() === disabledDate.getTime();
+		            });
+		        },
+		        events: allDisabledDates.map(date => ({
+		            start: date.toISOString().split('T')[0],
+		            end: date.toISOString().split('T')[0],
+		            allDay: true,
+		            display: 'background',
+		            backgroundColor: '#ff9f89' // 예약된 날짜 배경 색상 설정
+		        })),
 		        dateClick: function(info) {
-		            var inputDate = $('#inputDate').val(info.dateStr);
-		            
-		            var fullEndDate = new Date(info.dateStr); //fullCanlendar 의 선택한 날짜값을 date 로 형변환
-		            fullEndDate.setDate(fullEndDate.getDate() + stayNo); //숙박날짜 더해주기
+		            var selectedDate = new Date(info.dateStr);
+		            var isDisabled = allDisabledDates.some(disabledDate => {
+		                return selectedDate.getTime() === disabledDate.getTime();
+		            });
+
+		            if (isDisabled) {
+		                alert('이미 예약된 날짜입니다. 다른 날짜를 선택하세요.');
+		                return;
+		            }
+
+		            $('#inputDate').val(info.dateStr);
+
+		            var fullEndDate = new Date(info.dateStr); // fullCalendar의 선택한 날짜 값을 Date로 형변환
+		            fullEndDate.setDate(fullEndDate.getDate() + stayNo); // 숙박 날짜 더해주기
 		            var endDate = fullEndDate.toISOString().split('T')[0]; // 날짜 형태로 바꿔주기
 		            $('#endDate').val(endDate);
-		    		
-		            //스타일
-		            $('.fc-daygrid-day').removeClass('fc-day-selected'); //모든셀 표시제거
-		            $(info.dayEl).addClass('fc-day-selected'); //클릭된 날짜만 표시
+
+		            // 스타일
+		            $('.fc-daygrid-day').removeClass('fc-day-selected'); // 모든 셀 표시 제거
+		            $(info.dayEl).addClass('fc-day-selected'); // 클릭된 날짜만 표시
 		        }
 		    });
+
 		    setTimeout(function() {
 		        calendar.render();
 		    }, 3000);

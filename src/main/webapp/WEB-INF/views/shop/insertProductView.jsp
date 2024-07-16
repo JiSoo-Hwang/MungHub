@@ -45,7 +45,7 @@
                         <th><label for="brandCode">브랜드</label></th>
                         <td><select name="brandCode">
                         	  <c:forEach items="${b}" var="brand">
-                        	<option value="${brand.brandCode }">${brand.brandeName }</option>
+                        	<option value="${brand.brandCode }">${brand.brandName }</option>
                         </c:forEach>
                         </select></td>
                     </tr>
